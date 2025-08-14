@@ -1,112 +1,129 @@
-# tinygoで液晶に日本語を表示する手順
+# WBGT_watcher
 
-現在は、tinygoは、直接、液晶画面に多バイト文字のフォントを表示することはできない。
-また、組み込みの場合、巨大なフォントデータを埋め込んでおいても、そのごく一部しか使用されることがないので、不合理である。
+WBGT 計測ユニット
 
-https://github.com/tinygo-org/tinyfont/tree/release/examples/unicode_font3_const2bit
+M5Stack と I2C接続のI2Cユニットを組み合わせ、温湿度、気圧変化を測定し、暑さ指数と不快指数を
+表示するシステムである。1分毎に表示を更新し、計測データは、シリアル通信でUSBケーブルを通じて、ホストに送出される。
 
-そこで、上記のtinygo本家に書かれていた多バイト文字の表示手順を参考にして、
-M5Stackの液晶画面に日本語を表示してみた。
+![システム構成図](../images/SystemConfigurationDiagram.png){width=50%}  
+システム構成図  
 
-1. 作業用ディレクトリの作成とモジュール管理ファイルの生成
+![WBGT 計測ユニット](../photo/DSCN0223_800x600.jpg)  
+WBGT 計測ユニット  
 
-```bash
-mkdir UnicodeTest
-cd UnicodeTest
-go mod init UnicodeTest
-```
+## ハードウェア
 
-2. 事前にUnicode_fontをダウンロードしておく。
+* M5Stack社 [M5Stack gray](https://docs.m5stack.com/ja/core/gray)
+* M5Stack社 [ENV IV Unit](https://docs.m5stack.com/ja/unit/ENV%E2%85%A3%20Unit)  
+  Temperature Humidity Air Pressure Sensor (SHT40+BMP280)
 
-    https://fonts.google.com/noto/specimen/Noto+Sans+JP
-    https://fonts.google.com/noto/specimen/Noto+Sans+KR
-        NotoSansJP-Regular.ttf
-        NotoSansKR-Regular.ttf
+M5Stackに、温湿度センサーユニットをI2Cケーブルで接続しただけのシンプルな構成である。  
 
-3. テストディレクトリを作成し、以下のURLより多バイトの文字列を含むソースコードをダウンロードしてくる。
+## ソフトウェア  
 
-https://github.com/tinygo-org/tinyfont/blob/release/examples/unicode_font3_const2bit/main.go
+tinygoを使用して開発した。
+液晶と温湿度センサーユニットを初期化後、1分毎に、液晶の表示を更新し、測定結果を
+シリアル通信でUSBケーブルを通じて送出するだけのシンプルな構成である。  
 
-```bash
-mkdir test
-cd test
-```
-
-4. フォントデータの変換ツールを導入する。
+シリアルに出力するデータは、以下の順番で','区切りのテキストとして送出される。
 
 ```bash
-> go install tinygo.org/x/tinyfont/cmd/tinyfontgen@latest
-go: downloading github.com/hajimehoshi/go-jisx0208 v1.0.0
-go: downloading github.com/sago35/go-bdf v0.0.0-20200313142241-6c17821c91c4
-go: downloading golang.org/x/image v0.0.0-20220617043117-41969df76e82
-
-> go install tinygo.org/x/tinyfont/cmd/tinyfontgen-ttf@latest
-go: downloading golang.org/x/text v0.3.7 
+温度,湿度,気圧,暑さ指数,不快指数
 ```
 
-5. 多バイトの文字列を含むソースコードから、使用されているフォントだけのイメージデータをフォントファイルから抽出し、
-その一覧をデータ化したgoのソースコードを作成する。
+## コンパイルと書き込み
 
-C:\Users\089241\go\bin\tinyfontgen-ttf.exe
+以下のコマンドを実行すれば、コンパイル後、出来上がったプログラムは、直接、M5Stackに書き込まれる。  
 
 ```bash
-> dir jp*.go
-Mode                 LastWriteTime         Length Name
-----                 -------------         ------ ----
--a----        2025/08/06      9:01            332 jp-24pt_string.go
--a----        2025/08/06      9:00            484 jp-40pt_string.go
+tinygo flash  -target=m5stack -size=short -monitor .
 ```
+
+もし、上手く書き込めない場合は、以下のコマンドを実行し、uf2ファイルを生成する。  
+その後、出来上がったWBGT_watcher.uf2を手作業で、M5Stackに書き込めば良い。
 
 ```bash
-> tinyfontgen-ttf.exe --size 24 --verbose --output ./jp_font24.go --string-file ./jp-24pt_string.go --package main --fontname Notosans24pt ./NotoSansJP-Regular.ttf ./NotoSansKR-Regular.ttf
-> tinyfontgen-ttf.exe --size 40 --verbose --output ./jp_font40.go --string-file ./jp-40pt_string.go --package main --fontname Notosans40pt ./NotoSansJP-Regular.ttf ./NotoSansKR-Regular.ttf
-
-> dir jp*.go
-Mode                 LastWriteTime         Length Name
-----                 -------------         ------ ----
--a----        2025/08/06      9:01            332 jp-24pt_string.go
--a----        2025/08/06      9:00            484 jp-40pt_string.go
--a----        2025/08/06      9:16         169288 jp_font24.go
--a----        2025/08/06      9:17         424931 jp_font40.go
+tinygo build -o WBGT_watcher.uf2 -target=m5stack -size=short .
 ```
 
-6. main.goのコードをコンパイルを行う。
-最初に、モジュールが足りないという警告がでたので、指摘されたモジュールを追加インストールした。
+## 動作確認
 
-``` bash
-go get tinygo.org/x/tinyfont/const2bit
-```
-
-``` bash
-> tinygo build -o UnicodeTest.uf2 -target=wioterminal -size short ./test
-test\font.go:6:2: no required module provides package tinygo.org/x/tinyfont/const2bit; to add it:
-        go get tinygo.org/x/tinyfont/const2bit
-test\main.go:7:2: no required module provides package tinygo.org/x/tinyfont; to add it:
-        go get tinygo.org/x/tinyfont
-test\main.go:8:2: no required module provides package tinygo.org/x/tinyfont/examples/initdisplay; to add it:
-        go get tinygo.org/x/tinyfont/examples/initdisplay
-
-> go get tinygo.org/x/tinyfont
-go: added github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-go: added tinygo.org/x/drivers v0.29.0
-go: added tinygo.org/x/tinyfont v0.5.0
-
-> go get tinygo.org/x/tinyfont/examples/initdisplay
-```
-
-7. 再度、コンパイルを行った。無事に、バイナリファイルを生成できた。
+flashで書き込みができた場合は、自動的にコンソールがモニターモードに切り替わる。  
+そして、しばらくすると、以下のように、1分毎に1行づつ測定データが表示される。  
+終了するには、Ctrl+Cを押す。  
 
 ```bash
-> tinygo build -o UnicodeTest.uf2 -target=wioterminal -size short ./test
-   code    data     bss |   flash     ram
-  25352     296    6688 |   25648    6984
-
-> dir UnicodeTest.uf2
-
-Mode                 LastWriteTime         Length Name
-----                 -------------         ------ ----
--a----        2025/01/08     22:03          51712 UnicodeTest.uf2
-
+2025-08-08,08:30:15,27.14,67.06,989.02,23.84,76.72
+2025-08-08,08:31:15,27.10,67.26,989.02,23.82,76.67
+2025-08-08,08:32:16,27.11,67.35,989.02,23.84,76.71
+2025-08-08,08:33:16,27.15,67.33,989.02,23.88,76.76
+2025-08-08,08:34:16,27.19,67.32,988.99,23.92,76.82
+2025-08-08,08:35:15,27.20,67.18,989.02,23.91,76.81
+2025-08-08,08:36:15,27.23,67.05,989.04,23.92,76.84
+2025-08-08,08:37:15,27.23,66.85,989.05,23.90,76.81
+2025-08-08,08:38:16,27.21,66.76,989.08,23.87,76.77
+2025-08-08,08:39:16,27.20,66.75,989.07,23.86,76.77
+2025-08-08,08:40:16,27.19,66.74,989.09,23.85,76.74
+2025-08-08,08:41:15,27.16,66.61,989.08,23.81,76.69
+2025-08-08,08:42:15,27.16,66.51,989.09,23.80,76.67
+2025-08-08,08:43:15,27.16,66.43,989.08,23.79,76.67
+2025-08-08,08:44:16,27.16,66.43,989.09,23.79,76.66
+2025-08-08,08:45:16,27.14,66.33,989.08,23.76,76.62
+2025-08-08,08:46:15,27.15,66.16,989.12,23.75,76.62
+2025-08-08,08:47:15,27.17,66.11,989.13,23.77,76.64
+2025-08-08,08:48:15,27.18,65.99,989.17,23.76,76.64
+2025-08-08,08:49:16,27.19,65.85,989.20,23.76,76.63
+2025-08-08,08:50:16,27.17,65.74,989.22,23.73,76.60
 ```
 
-7. UnicodeTest.uf2ファイルを Wio Terminal に転送し、多バイトコードが表示されることを確認した。
+build でuf2ファイルを生成し、手作業でM5Stackに書き込んだ場合は、以下のコマンドを実行し、
+コンソールをモニターモードに切り替える。  
+
+```bash
+tinygo monitor
+```
+
+しばらくすると、1分毎に、1行づつ測定データが表示される。  
+終了するには、Ctrl+Cを押す。  
+
+## 注意点
+
+### 日本語の表示
+
+開発当初は、英数字のみで液晶に表示を行っていたが、日本語を含む文字列が加わると、表示ができなくなった。  
+現状では、tinygoは、内部に、英数字のフォントデータしか持っていないので、多バイト文字のフォントを表示することはできない。  
+また、組込みの場合、巨大なフォントデータを埋め込んでおいても、そのごく一部しか使用されることがないので、不合理である。  
+現状では、フォントファイルから、使用するフォントだけの情報を抜き出し、それを埋め込むことで、多バイト文字を表示している。  
+日本語の表記を変更する場合は、tinygo本家に書かれている以下の多バイト文字の表示手順のサンプルを参考にすること。
+
+[unicode_font3_const](https://github.com/tinygo-org/tinyfont/tree/release/examples/unicode_font3_const2bit)  
+
+### 文字化け
+
+液晶に”危険”と表示しようとしたが、"険"が正常に表示できなかった。  
+いろいろと試行錯誤した結果、旧字体の"險"であれば、表示できることがわかった。  
+新字体が表示できて、旧字体が表示できないのはありそうなことだが、その逆というのは、不思議なことだ。  
+原因は不明であるが、当面は、"危險"という表記にしておく。  
+他にも、表示できない文字があるのかもしれない。特に、旧字体が存在する文字コードは、鬼門なのかもしれない。
+
+### フォントデータのサイズ
+
+最初は、main.goのソースコードを直接参照してフォントデータを抽出していたが、データエリアが足りないというエラーがでて、コンパイルできなくなった。
+これは、main.goに含まれる文字列定義がすべて抽出されたため、埋め込まれるフォントデータのサイズが大きくなりすぎて、コンパイルできなくなったようだ。  
+
+最初は、以下のように、オリジナルのソースコードから、直接、24ptと40ptのフォントデータを生成していたので、データサイズが大きくなった。
+
+```bash
+main.go --> font24.go
+main.go --> font40.go
+```
+
+そこで、24ptと40ptのフォントを使う文字列をそれぞれ別ファイルで定義し、それをmain.goから参照するコードに書き換えた。
+そして、別ファイルになった文字列の定義ファイルから、それぞれのフォントデータを生成する方法に切り替えた。
+こうすることで、必要最低限の文字コードのデータしか抽出されないので、フォントデータが小さくなり、コンパイルできるようになった。  
+
+```bash
+main.go
+jp-40pt_string.go --> jp_font40.go
+jp-24pt_string.go --> jp_font24.go
+```

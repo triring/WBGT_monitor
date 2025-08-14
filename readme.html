@@ -1,0 +1,106 @@
+<h1 id="wbgt-monitor">WBGT monitor</h1>
+<p>暑さ指数計測システム</p>
+<h2 id="概要">概要</h2>
+<p>M5Stack社 のM5Stack gray
+と温湿度センサーユニットで、暑さ指数(WBGT)を記録するシステムを作成した。
+温湿度の測定は、すでにArduino-IDE(C++)やPythonなどで開発された多くのサンプルや事例が公開されている。<br />
+今回、なぜ、この様なシステムを作成したのか？
+理由は以下のとおりである。</p>
+<ol type="1">
+<li>今年６月より、労働安全衛生規則の改正により、職場での熱中症対策が義務化され、作業環境の暑さ指数を測定し、リスクを評価する必要になった。<br />
+職場や自宅で、適正に温湿度管理ができているかを調べたい。<br />
+</li>
+<li>最近、学んだTinygoで、dどこまで実用的なシステムが構築できるか試してみた。</li>
+</ol>
+<p>結論としては、M5Stack
+では、tinygoでサポートされていない機能等や制約があった。それを補完するため、Raspberry
+Piを併用して必要最低限の機能を実装することができた。</p>
+<h2 id="ハードウェア">ハードウェア</h2>
+<ul>
+<li>M5Stack社 <a href="https://docs.m5stack.com/ja/core/gray">M5Stack
+gray</a></li>
+<li>M5Stack社 <a
+href="https://docs.m5stack.com/ja/unit/ENV%E2%85%A3%20Unit">ENV IV
+Unit</a><br />
+Temperature Humidity Air Pressure Sensor (SHT40+BMP280)</li>
+<li>raspberrypi財団 <a
+href="https://www.raspberrypi.com/products/raspberry-pi-3-model-b/">Raspberry
+Pi 3 Model B</a></li>
+</ul>
+<p><img src="photo/DSCN0214_720x540.jpg" alt="システムの外観" /><br />
+システムの外観</p>
+<h2 id="ソフトウェア">ソフトウェア</h2>
+<ul>
+<li><a href="https://tinygo.org">tinygo</a> version 0.38.0<br />
+M5Stackのプログラム開発に使用<br />
+</li>
+<li><a href="https://go.dev/">go</a> version go1.24.5 and LLVM version
+19.1.2<br />
+Raspberry pi側のプログラム開発に使用</li>
+</ul>
+<h2 id="開発したアプリ">開発したアプリ</h2>
+<h3 id="wbgt_watcher"><a
+href="./WBGT_watcher/readme.md">WBGT_watcher</a></h3>
+<p>M5Stack+温湿度センサーを制御し、一定時間毎に温度、湿度、気圧を測定するシステムをtinygoで開発した。<br />
+測定結果から、暑さ指数(WBGT)、不快指数(THI)を算出して、一定時間毎に結果をシリアルに出力する。また、液晶の表示を更新を行う。<br />
+<a href="./WBGT_watcher/readme.md">WBGT_watcher</a> へ</p>
+<h3 id="serial_logger"><a
+href="./serial_logger/readme.md">serial_logger</a></h3>
+<p><a
+href="https://www.raspberrypi.com/products/raspberry-pi-3-model-b/">Raspberry
+Pi 3 Model
+B</a>上で動作するロギング用のアプリ機能は、シリアルポートを監視し、WBGT_watcherから送られてくる測定データを受取る。
+そのデータに、受信した日時を加えて、CSVファイルとして保存するだけの単純なものである。<br />
+開発にはGo言語を使用した。<br />
+<a href="./serial_logger/readme.md">serial_logger</a> へ</p>
+<h2 id="運用結果">運用結果</h2>
+<p>今回、開発したシステムで、Raspberry Pi
+のcronを設定し、測定ユニットから送られてくる温湿度等をcsv形式で記録した。<br />
+以下は、その収集データをpythonで加工し、グラフ化したものである。
+このグラブ描画スクリプトは、以下のディレクトリで公開している。<br />
+<a href="plot/readme.md">plot</a></p>
+<p><img src="plot/Temperature_Humidity.png"
+alt="plot/Temperature_Humidity.png" /> <a
+href="plot/Temperature_Humidity.png">温湿度変化</a></p>
+<p><img src="plot/Pressure.png" alt="plot/Pressure.png" /><br />
+<a href="plot/Pressure.png">気圧変化</a></p>
+<p><img src="plot/HeatIndex.png" alt="plot/HeatIndex.png" /><br />
+<a href="plot/HeatIndex.png">暑さ指数.png</a></p>
+<p><img src="plot/DiscomfortIndex.png"
+alt="plot/DiscomfortIndex.png" /><br />
+<a href="plot/DiscomfortIndex.png">不快指数</a></p>
+<p>このシステムで、1週間ほど運用しているが、現在のところ、安定して運用できている。</p>
+<h2 id="今後の課題">今後の課題</h2>
+<p>最初は、M5Stack＋温湿度センサーだけで、システムを構築できると考えて開発を始めた。
+しかし、以下のような問題があったので、これらの足りない機能を補うためにRaspberry
+Piを併用してシステムを実装することになった。</p>
+<ul>
+<li>tinygoでは、SPIの機能はサポートされているが、M5StackのSDカードの読み書きはできなかった。<br />
+M5Stackでは液晶とSDカードが同じSPIのラインに接続されおり、適宜、切り替えながらアクセスすることが必要なようだ。</li>
+<li>tinygoでは、M5StackのWiFiやBluetooth機能がサポートサれていなかった。</li>
+<li>時刻管理に必要なRTCが使えなかった。RTCをI2Cに接続すると、同じくI2C接続の温湿度センサーと競合するのか、正常に機能しなかった。
+(アドレスは競合していなかった。通信速度等の設定が問題かもしれない。)</li>
+</ul>
+<p>tinygoは、まだ、発展途上なので、これらも問題も徐々に改善されていくと思われる。<br />
+今後公開されるtinygoの新しい機能をこのシステムに取り込みながら、改良を続けていく予定である。</p>
+<h2 id="ライセンス">ライセンス</h2>
+<p>お粗末なコードではあるが、<a href="./LICENSE">MIT License</a> と
+BEER-WAREのデュアルライセンスとして配布する。</p>
+<p>BEER-WAREとは、<a
+href="https://people.freebsd.org/%7Ephk/">Poul-Henning Kamp</a>
+氏が提唱したライセンスである。</p>
+<h3 id="the-beer-ware-license-revision-42">“THE BEER-WARE LICENSE”
+(Revision 42)</h3>
+<p><a href="mailto:akio@triring.net" class="email">akio@triring.net</a>
+wrote this file. As long as you retain this notice you can do whatever
+you want with this stuff. If we meet some day, and you think this stuff
+is worth it, you can buy me a beer in return. Copyright (c) 2025 Akio
+MIWA <span class="citation" data-cites="triring">@triring</span></p>
+<h3 id="the-beer-ware-license-第42版">“THE BEER-WARE LICENSE”
+(第42版)</h3>
+<p>このファイルは、<a href="mailto:akio@triring.net"
+class="email">akio@triring.net</a>
+が書きました。あなたがこの条文を載せている限り、あなたはソフトウェアをどのようにでも扱うことができます。
+もし、いつか私達が出会った時、あなたがこのソフトに価値があると感じたなら、見返りとして私にビールを奢ることができます。<br />
+Copyright (c) 2025 Akio MIWA <span class="citation"
+data-cites="triring">@triring</span></p>

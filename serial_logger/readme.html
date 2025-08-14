@@ -1,0 +1,30 @@
+<h1 id="serial_logger">serial_logger</h1>
+<p>シリアルからの入力を監視し、受け取った文字列の先頭に、受信した日付と時刻を加えて、コンソールへの表示とログファイルへの追記を行う。<br />
+以下のように構成されたシステムで、Raspi上でこのプログラムを実行し、計測ユニットから、定期的に送られてくる計測データを記録していくために、go言語で作成した。</p>
+<p><img src="../images/SystemConfigurationDiagram.png"
+style="width:50.0%" alt="システム構成図" /><br />
+システム構成図</p>
+<p><img src="../photo/DSCN0214_720x540.jpg"
+alt="システムの外観" /><br />
+システムの外観</p>
+<h2 id="コンパイル">コンパイル</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> go build <span class="at">-o</span> serial_logger main.go</span></code></pre></div>
+<h2 id="実行">実行</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./serial_logger</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span></span></code></pre></div>
+<ul>
+<li>-baud オプションでボーレートを受け取る (デフォルト値: 115200)</li>
+<li>-file オプションで出力ファイル名を受け取る (デフォルト値:
+serial_log.txt)</li>
+<li>-port シリアルポート名を指定する。 (デフォルト値: /dev/ttyUSB0)</li>
+</ul>
+<h2 id="使用例">使用例</h2>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ./serial_logger <span class="at">-baud</span> 115200 <span class="at">-port</span> /dev/ttyUSB0 <span class="at">-file</span> WBGT<span class="kw">`</span><span class="fu">date</span> <span class="st">&quot;+%Y%m%d&quot;</span><span class="kw">`</span>.csv</span></code></pre></div>
+<p>上記は、Raspberry Pi上で使用することを想定した起動例である。</p>
+<ul>
+<li>シリアルポート/dev/ttyUSB0を監視する。</li>
+<li>通信速度は、115200 bps に設定する。</li>
+<li>シリアルから送られてくる計測データは、その日の日付を埋め込んだファイルにCSV形式で追記していく。</li>
+</ul>
