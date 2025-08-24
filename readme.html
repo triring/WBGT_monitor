@@ -55,21 +55,63 @@ B</a>上で動作するロギング用のアプリ機能は、シリアルポー
 <a href="./serial_logger/readme.md">serial_logger</a> へ</p>
 <h2 id="運用結果">運用結果</h2>
 <p>今回、開発したシステムで、Raspberry Pi
-のcronを設定し、測定ユニットから送られてくる温湿度等をcsv形式で記録した。<br />
-以下は、その収集データをpythonで加工し、グラフ化したものである。
+のcronを設定し、測定ユニットから送られてくる温湿度等をcsv形式で記録した。</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:00:15,27.10,64.67,989.17,23.54,76.35</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:01:16,27.09,64.57,989.20,23.53,76.33</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:02:16,27.09,64.47,989.20,23.52,76.32</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:03:16,27.12,64.35,989.21,23.53,76.34</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:04:15,27.10,64.22,989.23,23.50,76.29</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:05:15,27.10,64.15,989.24,23.49,76.28</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:06:15,27.09,64.04,989.25,23.47,76.26</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:07:16,27.10,64.03,989.26,23.48,76.27</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:08:16,27.10,63.93,989.27,23.47,76.26</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:09:15,27.11,63.81,989.28,23.46,76.26</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:10:15,27.09,63.75,989.26,23.44,76.22</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:11:15,27.09,63.73,989.27,23.43,76.22</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:12:16,27.07,63.57,989.26,23.40,76.18</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:13:16,27.07,63.46,989.27,23.39,76.16</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:14:16,27.08,63.48,989.27,23.40,76.18</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:15:15,27.10,63.47,989.28,23.42,76.21</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:16:15,27.11,63.38,989.28,23.42,76.21</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:17:15,27.14,63.29,989.28,23.43,76.24</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:18:16,27.15,63.22,989.30,23.44,76.25</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:19:16,27.19,63.10,989.30,23.46,76.28</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ex">2025-08-08,09:20:16,27.16,62.99,989.31,23.42,76.23</span></span></code></pre></div>
+<h2 id="収集データのグラフ化"><a
+href="plot/readme.md">収集データのグラフ化</a></h2>
+<p>収集データはpythonで加工し、グラフ化した。以下の一連の図は、その一例で、空調が効いている平日と空調が停止している休日のデータをグラフ化したものである。<br />
 このグラブ描画スクリプトは、以下のディレクトリで公開している。<br />
-<a href="plot/readme.md">plot</a></p>
-<p><img src="plot/Temperature_Humidity.png"
-alt="plot/Temperature_Humidity.png" /> <a
-href="plot/Temperature_Humidity.png">温湿度変化</a></p>
-<p><img src="plot/Pressure.png" alt="plot/Pressure.png" /><br />
-<a href="plot/Pressure.png">気圧変化</a></p>
-<p><img src="plot/HeatIndex.png" alt="plot/HeatIndex.png" /><br />
-<a href="plot/HeatIndex.png">暑さ指数.png</a></p>
-<p><img src="plot/DiscomfortIndex.png"
-alt="plot/DiscomfortIndex.png" /><br />
-<a href="plot/DiscomfortIndex.png">不快指数</a></p>
-<p>このシステムで、1週間ほど運用しているが、現在のところ、安定して運用できている。</p>
+<a href="plot/readme.md">plot/readme.md</a></p>
+<h3 id="温湿度変化">温湿度変化</h3>
+<p><img src="plot/Temperature_Humidity20250815.png"
+alt="plot/Temperature_Humidity20250815.png" /><br />
+<a href="plot/Temperature_Humidity20250815.png">平日</a> <img
+src="plot/Temperature_Humidity20250816.png"
+alt="plot/Temperature_Humidity20250816.png" /><br />
+<a href="plot/Temperature_Humidity20250816.png">休日</a></p>
+<h3 id="暑さ指数">暑さ指数</h3>
+<p><img src="plot/HeatIndex20250815.png"
+alt="plot/HeatIndex20250815.png" /><br />
+<a href="plot/HeatIndex20250815.png">平日</a><br />
+<img src="plot/HeatIndex20250816.png"
+alt="plot/HeatIndex20250816.png" /><br />
+<a href="plot/HeatIndex20250816.png">休日</a></p>
+<h3 id="不快指数">不快指数</h3>
+<p><img src="plot/DiscomfortIndex20250815.png"
+alt="plot/DiscomfortIndex20250815.png" /><br />
+<a href="plot/DiscomfortIndex20250815.png">平日</a><br />
+<img src="plot/DiscomfortIndex20250816.png"
+alt="plot/DiscomfortIndex20250816.png" /><br />
+<a href="plot/DiscomfortIndex20250816.png">休日</a></p>
+<h3 id="気圧変化">気圧変化</h3>
+<p><img src="plot/Pressure20250815.png"
+alt="plot/Pressure20250815.png" /><br />
+<a href="plot/Pressure20250815.png">平日</a><br />
+<img src="plot/Pressure20250816.png"
+alt="plot/Pressure20250816.png" /><br />
+<a href="plot/Pressure20250816.png">休日</a></p>
+<p>このシステムで、1週間ほど連続運用しているが、現在のところ、安定して稼働している。</p>
 <h2 id="今後の課題">今後の課題</h2>
 <p>最初は、M5Stack＋温湿度センサーだけで、システムを構築できると考えて開発を始めた。
 しかし、以下のような問題があったので、これらの足りない機能を補うためにRaspberry
@@ -78,11 +120,12 @@ Piを併用してシステムを実装することになった。</p>
 <li>tinygoでは、SPIの機能はサポートされているが、M5StackのSDカードの読み書きはできなかった。<br />
 M5Stackでは液晶とSDカードが同じSPIのラインに接続されおり、適宜、切り替えながらアクセスすることが必要なようだ。</li>
 <li>tinygoでは、M5StackのWiFiやBluetooth機能がサポートサれていなかった。</li>
-<li>時刻管理に必要なRTCが使えなかった。RTCをI2Cに接続すると、同じくI2C接続の温湿度センサーと競合するのか、正常に機能しなかった。
+<li>時刻管理に必要なRTCが使えなかった。I2CにRTCを接続すると、同じくI2C接続の温湿度センサーと競合するのか、正常に機能しなかった。
 (アドレスは競合していなかった。通信速度等の設定が問題かもしれない。)</li>
 </ul>
-<p>tinygoは、まだ、発展途上なので、これらも問題も徐々に改善されていくと思われる。<br />
-今後公開されるtinygoの新しい機能をこのシステムに取り込みながら、改良を続けていく予定である。</p>
+<p>tinygoでのM5Stackのサポート状況は、まだ、発展途上なので、これらも問題も徐々に改善されていくと思われる。</p>
+<p>https://tinygo.org/docs/reference/microcontrollers/m5stack/</p>
+<p>今後、tinygoで、上記の問題を解決する機能が追加されれば、それらをこのシステムに取り込みながら、少しづつ改良を続けていく予定である。</p>
 <h2 id="ライセンス">ライセンス</h2>
 <p>お粗末なコードではあるが、<a href="./LICENSE">MIT License</a> と
 BEER-WAREのデュアルライセンスとして配布する。</p>
