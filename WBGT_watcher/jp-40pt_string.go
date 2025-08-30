@@ -11,5 +11,5 @@ const (
 	txt_wbgt2 string = "注意"
 	txt_wbgt3 string = "警戒"
 	txt_wbgt4 string = "厳重警戒"
-	txt_wbgt5 string = "危險" // 危険の険が表示できないので、旧字を使用する。
+	txt_wbgt5 string = "危険" // 危険の険が表示できないので、旧字を使用する。
 )
